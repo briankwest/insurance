@@ -214,50 +214,43 @@ Here’s an example of how the `verify_insurance` API might look when a request 
 Here’s Python code to mock the therapy AI Agent’s core functions, simulating the behavior as described in the SWAIG schemas.
 
 ```python
-def verify_insurance(data):
-    mock_data = {
-        "123456789": {
-            "provider": "Blue Cross Blue Shield",
-            "dob": "1980-01-01",
-            "status": "active"
-        }
-    }
-    member_id = data["argument"]["parsed"][0]["member_id"]
-    insurance_provider = data["argument"]["parsed"][0]["insurance_provider"]
-    dob = data["argument"]["parsed"][0]["date_of_birth"]
+def verify_insurance(member_id=None, insurance_provider=None, date_of_birth=None):
+    data = request.json
+    human_readable_mock_data = "Member ID: 123456789, Provider: Blue Cross Blue Shield, Date of Birth: 1980-01-01, Status: active"
+    return human_readable_mock_data
 
-    if member_id in mock_data and mock_data[member_id]["provider"].lower() == insurance_provider.lower() and mock_data[member_id]["dob"] == dob:
-        return {"status": "success", "message": "Insurance verified as active."}
-    return {"status": "error", "message": "Invalid insurance details or inactive status."}
-
-def check_eligibility(data):
+def check_eligibility(member_id=None):
+    data = request.json
     eligibility_data = {
         "123456789": ["online_therapy", "in_person_therapy"]
     }
     member_id = data["argument"]["parsed"][0]["member_id"]
 
     if member_id in eligibility_data:
-        return {"status": "success", "covered_services": eligibility_data[member_id]}
-    return {"status": "error", "message": "No coverage for online therapy."}
+        covered_services = ', '.join(eligibility_data[member_id])
+        return f"Success: The member is covered for the following services: {covered_services}."
+    return "Error: No coverage for online therapy."
 
-def schedule_therapy_session(data):
-    user_id = data["argument"]["parsed"][0]["user_id"]
-    preferred_date = data["argument"]["parsed"][0]["preferred_date"]
-    preferred_time = data["argument"]["parsed"][0]["preferred_time"]
-    therapist_id = data["argument"]["parsed"][0]["therapist_id"]
-    return {"status": "success", "message": f"Session scheduled on {preferred_date} at {preferred_time} with therapist {therapist_id}."}
+def schedule_therapy_session(member_id=None, preferred_date=None, preferred_time=None, therapist_id=None):
+    return f"Success: Session scheduled on {preferred_date} at {preferred_time} with therapist {therapist_id}."
 
-# Example call
-example_data = {
-    "ai_session_id": "example-session-id",
-    "app_name": "therapy_agent_app",
-    "argument": {
-        "parsed": [{"insurance_provider": "Blue Cross Blue Shield", "member_id": "123456789", "date_of_birth": "1980-01-01"}],
-        "raw": "{\"insurance_provider\":\"Blue Cross Blue Shield\",\"member_id\":\"123456789\",\"date_of_birth\":\"1980-01-01\"}"
-    },
-    "function": "verify_insurance",
-    "purpose": "Verify the insurance provider and confirm active status"
-}
+def get_therapist_info(insurance_provider=None):
+    therapists = [
+        {"id": "therapist_1", "name": "Dr. Smith", "specialty": "Cognitive Behavioral Therapy"},
+        {"id": "therapist_2", "name": "Dr. Jones", "specialty": "Family Therapy"}
+    ]
+    human_readable_data = "Available therapists: " + ", ".join(
+        [f"{therapist['name']} specializes in {therapist['specialty']}" for therapist in therapists]
+    )
+    return human_readable_data
+
+def provide_copay_information(member_id=None):
+    data = request.json
+    copay_info = {
+        "123456789": {"copay": 20}
+    }
+    if member_id in copay_info:
+        return f"Member ID {member_id} has a copay of ${copay_info[member_id]['copay']}."
 
 # Execute the mock verify function
 print(verify_insurance(example_data))
