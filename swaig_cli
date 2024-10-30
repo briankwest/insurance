@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+import argparse
+import requests
+import json
+
+def get_signatures(url, function_names):
+    payload = {
+        "functions": function_names,  # Pass function_names directly as an array
+        "action": "get_signature",
+        "version": "2.0",
+        "content_disposition": "function signature request",
+        "content_type": "text/swaig"
+    }
+    response = requests.post(url, json=payload)
+    return response.json()
+
+def test_function(url, function_names, args):
+    signatures = get_signatures(url, function_names)
+    function_signature = next((f for f in signatures if f['function'] in function_names), None)
+    
+    if not function_signature:
+        print(f"Function {function_names} not found.")
+        return
+
+    required_args = function_signature['parameters'].get('required', [])
+    properties = function_signature['parameters']['properties']
+    
+    # Collect required and optional arguments from user
+    function_args = {}
+    for arg, details in properties.items():
+        arg_type = details['type']
+        is_required = arg in required_args
+        prompt = f"Enter value for {arg} ({arg_type})"
+        if not is_required:
+            prompt += " [optional]"
+        
+        value = input(prompt + ": ")
+        
+        if value or is_required:  # Only process if value is provided or if it's required
+            if arg_type == "integer":
+                value = int(value)
+            elif arg_type == "boolean":
+                value = value.lower() in ("true", "1", "yes")
+            function_args[arg] = value
+
+    # Make the request to test the function
+    payload = {
+        "function": function_names[0],  # Assuming you want to test the first function in the list
+        "argument": {"parsed": [function_args]}
+    }
+    response = requests.post(url, json=payload)
+    print("Response:", response.json())
+
+def main():
+    parser = argparse.ArgumentParser(description="SWAIG CLI Tool")
+    parser.add_argument('--url', required=True, help='The SWAIG server URL')
+    parser.add_argument('--get-signatures', action='store_true', help='Get function signatures')
+    parser.add_argument('--function', help='Test a specific function by name')
+
+    args = parser.parse_args()
+
+    function_names = args.function.split(',') if args.function else []
+
+    if args.get_signatures:
+        signatures = get_signatures(args.url, function_names)  # Pass as an array
+        print(json.dumps(signatures, indent=2))
+    elif args.function:
+        test_function(args.url, [args.function], args)  # Pass as an array
+    else:
+        parser.print_help()
+
+if __name__ == "__main__":
+    main()
