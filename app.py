@@ -57,7 +57,7 @@ def schedule_therapy_session(member_id, preferred_date, preferred_time, therapis
     insurance_provider=Parameter("string", "Insurance provider name"))
 def get_therapist_info(insurance_provider):
     therapists = MOCK_DATA['therapists']
-    return ", ".join(f"{t['name']} ({t['specialty']})" for t in therapists)
+    return ", ".join(f"Therapist ID: {t['id']}, Name: {t['name']}, Specialty: {t['specialty']}" for t in therapists)
 
 @swaig.endpoint("Get copay information",
     member_id=Parameter("string", "Member ID number"))
