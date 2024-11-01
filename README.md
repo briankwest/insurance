@@ -23,7 +23,7 @@ This document outlines the design for a *Therapy Eligibility AI Agent* using the
 
 ## 2. Overview
 
-Each SWAIG function accepts `POST` data in a structured JSON format, including an `argument` field that defines parameters as per OpenAI Tool Spec schema. These functions perform tasks like insurance verification, eligibility confirmation, therapist retrieval, and copay information. 
+Each SWAIG function accepts `POST` data in a structured JSON format, including an `parameters` field that defines parameters as per OpenAI Tool Spec schema. These functions perform tasks like insurance verification, eligibility confirmation, therapist retrieval, and copay information. 
 
 ---
 
