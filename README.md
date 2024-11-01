@@ -214,45 +214,43 @@ Here’s an example of how the `verify_insurance` API might look when a request 
 Here’s Python code to mock the therapy AI Agent’s core functions, simulating the behavior as described in the SWAIG schemas.
 
 ```python
-def verify_insurance(member_id=None, insurance_provider=None, date_of_birth=None):
-    data = request.json
-    human_readable_mock_data = "Member ID: 123456789, Provider: Blue Cross Blue Shield, Date of Birth: 1980-01-01, Status: active"
-    return human_readable_mock_data
+@swaig.endpoint("Verify insurance status",
+    insurance_provider=Parameter("string", "Insurance provider name"),
+    member_id=Parameter("string", "Member ID number"),
+    date_of_birth=Parameter("string", "Date of birth (YYYY-MM-DD)"))
+def verify_insurance(member_id, insurance_provider, date_of_birth):
+    if member_id in MOCK_DATA['insurance']:
+        return f"Member ID: {member_id}, Provider: {insurance_provider}, Status: active"
+    return "Insurance not found"
 
-def check_eligibility(member_id=None):
-    data = request.json
-    eligibility_data = {
-        "123456789": ["online_therapy", "in_person_therapy"]
-    }
-    member_id = data["argument"]["parsed"][0]["member_id"]
+@swaig.endpoint("Check therapy coverage",
+    member_id=Parameter("string", "Member ID number"))
+def check_eligibility(member_id):
+    if member_id in MOCK_DATA['insurance']:
+        services = ', '.join(MOCK_DATA['insurance'][member_id]['services'])
+        return f"Covered services: {services}"
+    return "No coverage found"
 
-    if member_id in eligibility_data:
-        covered_services = ', '.join(eligibility_data[member_id])
-        return f"Success: The member is covered for the following services: {covered_services}."
-    return "Error: No coverage for online therapy."
+@swaig.endpoint("Schedule therapy session",
+    member_id=Parameter("string", "Member ID number"),
+    preferred_date=Parameter("string", "Preferred date (YYYY-MM-DD)"),
+    preferred_time=Parameter("string", "Preferred time (HH:MM)"),
+    therapist_id=Parameter("string", "Therapist ID"))
+def schedule_therapy_session(member_id, preferred_date, preferred_time, therapist_id):
+    return f"Session scheduled for {preferred_date} at {preferred_time}"
 
-def schedule_therapy_session(member_id=None, preferred_date=None, preferred_time=None, therapist_id=None):
-    return f"Success: Session scheduled on {preferred_date} at {preferred_time} with therapist {therapist_id}."
+@swaig.endpoint("Get available therapists",
+    insurance_provider=Parameter("string", "Insurance provider name"))
+def get_therapist_info(insurance_provider):
+    therapists = MOCK_DATA['therapists']
+    return ", ".join(f"Therapist ID: {t['id']}, Name: {t['name']}, Specialty: {t['specialty']}" for t in therapists)
 
-def get_therapist_info(insurance_provider=None):
-    therapists = [
-        {"id": "therapist_1", "name": "Dr. Smith", "specialty": "Cognitive Behavioral Therapy"},
-        {"id": "therapist_2", "name": "Dr. Jones", "specialty": "Family Therapy"}
-    ]
-    human_readable_data = "Available therapists: " + ", ".join(
-        [f"{therapist['name']} specializes in {therapist['specialty']}" for therapist in therapists]
-    )
-    return human_readable_data
-
-def provide_copay_information(member_id=None):
-    data = request.json
-    copay_info = {
-        "123456789": {"copay": 20}
-    }
-    if member_id in copay_info:
-        return f"Member ID {member_id} has a copay of ${copay_info[member_id]['copay']}."
-
-# Execute the mock verify function
-print(verify_insurance(example_data))
+@swaig.endpoint("Get copay information",
+    member_id=Parameter("string", "Member ID number"))
+def provide_copay_information(member_id):
+    if member_id in MOCK_DATA['insurance']:
+        copay = MOCK_DATA['insurance'][member_id]['copay']
+        return f"Copay amount: ${copay}"
+    return "Copay information not found"
 ```
 
