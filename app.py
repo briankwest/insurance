@@ -32,14 +32,14 @@ MOCK_DATA = {
     insurance_provider=Parameter("string", "Insurance provider name"),
     member_id=Parameter("string", "Member ID number"),
     date_of_birth=Parameter("string", "Date of birth (YYYY-MM-DD)"))
-def verify_insurance(member_id, insurance_provider, date_of_birth):
+def verify_insurance(member_id, insurance_provider, date_of_birth, meta_data_token=None, meta_data=None):
     if member_id in MOCK_DATA['insurance']:
         return f"Member ID: {member_id}, Provider: {insurance_provider}, Status: active"
     return "Insurance not found"
 
 @swaig.endpoint("Check therapy coverage",
     member_id=Parameter("string", "Member ID number"))
-def check_eligibility(member_id):
+def check_eligibility(member_id, meta_data_token=None, meta_data=None):
     if member_id in MOCK_DATA['insurance']:
         services = ', '.join(MOCK_DATA['insurance'][member_id]['services'])
         return f"Covered services: {services}"
@@ -50,18 +50,18 @@ def check_eligibility(member_id):
     preferred_date=Parameter("string", "Preferred date (YYYY-MM-DD)"),
     preferred_time=Parameter("string", "Preferred time (HH:MM)"),
     therapist_id=Parameter("string", "Therapist ID"))
-def schedule_therapy_session(member_id, preferred_date, preferred_time, therapist_id):
+def schedule_therapy_session(member_id, preferred_date, preferred_time, therapist_id, meta_data_token=None, meta_data=None):
     return f"Session scheduled for {preferred_date} at {preferred_time}"
 
 @swaig.endpoint("Get available therapists",
     insurance_provider=Parameter("string", "Insurance provider name"))
-def get_therapist_info(insurance_provider):
+def get_therapist_info(insurance_provider, meta_data_token=None, meta_data=None):
     therapists = MOCK_DATA['therapists']
     return ", ".join(f"Therapist ID: {t['id']}, Name: {t['name']}, Specialty: {t['specialty']}" for t in therapists)
 
 @swaig.endpoint("Get copay information",
     member_id=Parameter("string", "Member ID number"))
-def provide_copay_information(member_id):
+def provide_copay_information(member_id, meta_data_token=None, meta_data=None):
     if member_id in MOCK_DATA['insurance']:
         copay = MOCK_DATA['insurance'][member_id]['copay']
         return f"Copay amount: ${copay}"
