@@ -29,16 +29,16 @@ MOCK_DATA = {
 }
 
 @swaig.endpoint("Verify insurance status",
-    insurance_provider=Parameter("string", "Insurance provider name"),
-    member_id=Parameter("string", "Member ID number"),
-    date_of_birth=Parameter("string", "Date of birth (YYYY-MM-DD)"))
+    insurance_provider=Parameter("string", "Insurance provider name", required=True),
+    member_id=Parameter("string", "Member ID number", required=True),
+    date_of_birth=Parameter("string", "Date of birth (YYYY-MM-DD)", required=True))
 def verify_insurance(member_id, insurance_provider, date_of_birth, meta_data_token=None, meta_data=None):
     if member_id in MOCK_DATA['insurance']:
         return f"Member ID: {member_id}, Provider: {insurance_provider}, Status: active"
     return "Insurance not found"
 
 @swaig.endpoint("Check therapy coverage",
-    member_id=Parameter("string", "Member ID number"))
+    member_id=Parameter("string", "Member ID number", required=True))
 def check_eligibility(member_id, meta_data_token=None, meta_data=None):
     if member_id in MOCK_DATA['insurance']:
         services = ', '.join(MOCK_DATA['insurance'][member_id]['services'])
@@ -46,21 +46,21 @@ def check_eligibility(member_id, meta_data_token=None, meta_data=None):
     return "No coverage found"
 
 @swaig.endpoint("Schedule therapy session",
-    member_id=Parameter("string", "Member ID number"),
-    preferred_date=Parameter("string", "Preferred date (YYYY-MM-DD)"),
-    preferred_time=Parameter("string", "Preferred time (HH:MM)"),
-    therapist_id=Parameter("string", "Therapist ID"))
+    member_id=Parameter("string", "Member ID number", required=True),
+    preferred_date=Parameter("string", "Preferred date (YYYY-MM-DD)", required=True),
+    preferred_time=Parameter("string", "Preferred time (HH:MM)", required=True),
+    therapist_id=Parameter("string", "Therapist ID", required=True))
 def schedule_therapy_session(member_id, preferred_date, preferred_time, therapist_id, meta_data_token=None, meta_data=None):
     return f"Session scheduled for {preferred_date} at {preferred_time}"
 
 @swaig.endpoint("Get available therapists",
-    insurance_provider=Parameter("string", "Insurance provider name"))
+    insurance_provider=Parameter("string", "Insurance provider name", required=True))
 def get_therapist_info(insurance_provider, meta_data_token=None, meta_data=None):
     therapists = MOCK_DATA['therapists']
     return ", ".join(f"Therapist ID: {t['id']}, Name: {t['name']}, Specialty: {t['specialty']}" for t in therapists)
 
 @swaig.endpoint("Get copay information",
-    member_id=Parameter("string", "Member ID number"))
+    member_id=Parameter("string", "Member ID number", required=True))
 def provide_copay_information(member_id, meta_data_token=None, meta_data=None):
     if member_id in MOCK_DATA['insurance']:
         copay = MOCK_DATA['insurance'][member_id]['copay']
