@@ -2,13 +2,19 @@ from flask import Flask
 from dotenv import load_dotenv
 import os
 import random
+import logging
 from signalwire_swaig.core import SWAIG, SWAIGArgument
 
 load_dotenv()
 
-if os.environ.get('DEBUG', False):
-    os.environ['WERKZEUG_DEBUG_PIN'] = f"{random.randint(100, 999)}-{random.randint(100, 999)}-{random.randint(100, 999)}"
+logging.getLogger('werkzeug').setLevel(logging.WARNING)
 
+if os.environ.get('DEBUG', False):
+    print("Debug mode is enabled")
+    debug_pin = f"{random.randint(100, 999)}-{random.randint(100, 999)}-{random.randint(100, 999)}"
+    os.environ['WERKZEUG_DEBUG_PIN'] = debug_pin
+    logging.getLogger('werkzeug').setLevel(logging.DEBUG)
+    print(f"Debugger PIN: {debug_pin}")
 
 # Initialize Flask and SWAIG
 app = Flask(__name__)
