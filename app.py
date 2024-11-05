@@ -1,9 +1,14 @@
 from flask import Flask
 from dotenv import load_dotenv
 import os
+import random
 from signalwire_swaig.core import SWAIG, SWAIGArgument
 
 load_dotenv()
+
+if os.environ.get('DEBUG', False):
+    os.environ['WERKZEUG_DEBUG_PIN'] = f"{random.randint(100, 999)}-{random.randint(100, 999)}-{random.randint(100, 999)}"
+
 
 # Initialize Flask and SWAIG
 app = Flask(__name__)
@@ -68,4 +73,4 @@ def provide_copay_information(member_id, meta_data_token=None, meta_data=None):
     return "Copay information not found"
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True, port=5001) 
+    app.run(host='0.0.0.0', port=os.getenv('PORT', 5001), debug=os.getenv('DEBUG'))
